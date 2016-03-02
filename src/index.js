@@ -4,7 +4,7 @@ var _ = require('lodash');
 
 var placeHolderRegex = /:([a-zA-Z_][a-zA-Z0-9_]*)/g;
 
-var trimLeadingColon = _.ary(_.partialRight(_.trimLeft, ':'), 1);
+var trimLeadingColon = _.ary(_.partialRight(_.trimStart, ':'), 1);
 
 function assembleRoute(segment, routes) {
     var renderPath = _.template(segment, {interpolate: placeHolderRegex});
@@ -12,7 +12,7 @@ function assembleRoute(segment, routes) {
 }
 
 function assemble(routes, prefix) {
-    return _.zipObject(_.map(routes, function(val, key) {
+    return _.fromPairs(_.map(routes, function(val, key) {
         var name = _.isObject(val) ? val.$name : val;
         return [name, assembleRoute((prefix || '') + key, _.isObject(val) ? val.$routes : null)];
     }));
@@ -30,7 +30,7 @@ function match(routes, path) {
         var matched = path.match(re);
         if (matched) {
             var remainingPath = _.last(matched);
-            var params = _.zipObject(paramKeys, _.dropRight(_.rest(matched)));
+            var params = _.zipObject(paramKeys, _.dropRight(_.tail(matched)));
             if (subRoutes && remainingPath) {
                 var subMatch = match(subRoutes, remainingPath);
                 if (subMatch) {
@@ -69,4 +69,3 @@ module.exports = function(routes) {
     }
     return _.assign(resolve, router);
 };
-
