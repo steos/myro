@@ -4,7 +4,7 @@
   "description": "a bidirectional isomorphic microrouter",
   "author": "Stefan Oestreicher <oestef@gmail.com>",
   "main": "src/index.js",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
     "url": "https://github.com/steos/myro.git"

@@ -1,6 +1,6 @@
 #Myro
 
-__Myro__ is a bidirectional isomorphic micro-router.
+__Myro__ is a bidirectional universal micro-router.
 
 ###Getting Started
 
@@ -20,7 +20,7 @@ const route = myro({
     '/': {
         $name: 'index'
     },
-    
+
     '/users': {
         $name: 'users',
         $routes: {
@@ -29,15 +29,15 @@ const route = myro({
             }
         }
     },
-    
+
     '/about': {
         $name: 'about'
     }
 })
 
 // match routes...
-router('/users/foo')) // {$name: "users.user", $params: {name: "foo"}, $route: fn}
-router('/about')) //  {$name: "home.about", $params: {}, ... }
+route('/users/foo')) // {$name: "users.user", $params: {name: "foo"}, $route: fn}
+route('/about')) //  {$name: "home.about", $params: {}, ... }
 
 
 // retrieve the path
@@ -55,3 +55,8 @@ Coming soon.
 
 Coming soon.
 
+# License
+
+Copyright © 2016 Stefan Oestreicher and contributors.
+
+Distributed under the terms of the BSD-3-Clause license.
