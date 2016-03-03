@@ -32,12 +32,6 @@ function findMatch(routes, path) {
   return []
 }
 
-function attachParent(obj, parent) {
-  let root = obj
-  while (root.parent) root = root.parent
-  root.parent = parent
-}
-
 function match(routes, path, parent = null) {
     const [matched, segment] = findMatch(routes, path)
     if (!matched) return null
@@ -52,23 +46,23 @@ function match(routes, path, parent = null) {
         const childMatch = match(childRoutes, remainingPath, {name, props, params});
         if (childMatch) {
             const [childName, childParams, childRemaining, childProps, childParent] = childMatch
-            attachParent(childParent, parent)
             return [
               [name].concat(childName),
               _.assign({}, params, childParams),
               childRemaining,
               childProps,
-              childParent
+              childParent.concat(parent)
             ];
         }
     }
-    return [[name], params, remainingPath, props, parent];
+    return [[name], params, remainingPath, props, [parent]];
 }
 
 function resolve(routes, resolveRoute, path) {
     const matched = match(routes, _.trimEnd(path, '/'));
     if (matched) {
-        const [keys, params, remaining, props, parent] = matched
+        const [keys, params, remaining, props, parents] = matched
+        const parent = parents.reduceRight((parent, child) => _.assign({parent}, child), null)
         return {
             params,
             remaining,
