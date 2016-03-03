@@ -1,13 +1,13 @@
 # Introduction
 
 The myro API provides only one function which takes a route config and returns
-a router function. The router function takes a path and returns a route match
+a router function. The router function takes a path and returns a [route match](#route-match)
 or `null` if no route matched the given path.
 
 ```js
 import myro from 'myro'
 const route = myro({...})
-route('/foo/bar/baz')
+const match = route('/foo/bar/baz')
 ```
 
 ## Route Config
