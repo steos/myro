@@ -3,10 +3,11 @@
   "version": "0.2.0",
   "description": "a bidirectional universal microrouter",
   "author": "Stefan Oestreicher <oestef@gmail.com>",
-  "main": "src/index.js",
+  "main": "lib/myro.js",
   "license": "BSD-3-Clause",
   "scripts": {
-    "test": "karma start"
+    "test": "karma start",
+    "prepublish": "webpack -p"
   },
   "repository": {
     "type": "git",

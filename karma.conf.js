@@ -1,7 +1,16 @@
 var path = require("path");
 
+var webpackConfig = require('./webpack.config.js')
+
+// brrr, mutation
+delete webpackConfig.entry
+delete webpackConfig.output
+delete webpackConfig.context
+webpackConfig.devtool = 'sourcemap'
+
 // Karma configuration
 // Generated on Thu Jun 25 2015 13:58:27 GMT+0200 (CEST)
+
 
 module.exports = function(config) {
   config.set({
@@ -42,21 +51,7 @@ module.exports = function(config) {
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: ['progress'],
 
-    webpack: {
-      devtool: "sourcemap",
-      module: {
-          loaders: [
-              {
-                  test: /\.js$/,
-                  exclude: /node_modules/,
-                  loader: 'babel',
-                  query: {
-                    presets: ['es2015']
-                  }
-              }
-          ]
-      }
-    },
+    webpack: webpackConfig,
 
     // web server port
     port: 9876,
