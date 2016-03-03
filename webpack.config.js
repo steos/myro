@@ -8,6 +8,8 @@ module.exports = {
     output: {
         filename: "myro.js",
         path: path.join(__dirname, "lib"),
+        library: 'myro',
+        libraryTarget: 'umd'
     },
 
     module: {
