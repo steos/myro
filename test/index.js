@@ -8,31 +8,31 @@ describe('myro', function() {
             '/foo/bar': 'foobar'
         });
 
-        expect(router('/foo/bar').$name).toEqual('foobar');
+        expect(router('/foo/bar').name).toEqual('foobar');
 
         const bazMatch = router('/foo/bar/qux');
-        expect(bazMatch.$name).toEqual('foobarbaz');
-        expect(bazMatch.$params).toEqual({baz:'qux'});
+        expect(bazMatch.name).toEqual('foobarbaz');
+        expect(bazMatch.params).toEqual({baz:'qux'});
     });
 
     it('works recursively', function() {
         const router = myro({
             '/foo': {
-                $name: 'foo',
-                $routes: {
+                name: 'foo',
+                routes: {
                     '/bar': 'bar'
                 }
             }
         });
-        expect(router('/foo').$name).toEqual('foo');
-        expect(router('/foo/bar').$name).toEqual('foo.bar');
+        expect(router('/foo').name).toEqual('foo');
+        expect(router('/foo/bar').name).toEqual('foo.bar');
     });
 
     it('is bidirectional', function() {
         const router = myro({
             '/foo': {
-                $name: 'foo',
-                $routes: {
+                name: 'foo',
+                routes: {
                     '/bar/:baz': 'bar'
                 }
             }
@@ -45,14 +45,16 @@ describe('myro', function() {
     it('works with arbitrary payloads', function() {
         const router = myro({
             '/foo': {
-                $name: 'foo',
-                item1: 'data1',
-                item2: 'data2'
+                name: 'foo',
+                props: {
+                  item1: 'data1',
+                  item2: 'data2'
+                }
             }
         });
         const match = router('/foo');
-        expect(match.item1).toEqual('data1');
-        expect(match.item2).toEqual('data2');
+        expect(match.props.item1).toEqual('data1');
+        expect(match.props.item2).toEqual('data2');
     });
 
     it('does partial matching', function() {
@@ -60,8 +62,8 @@ describe('myro', function() {
             '/foo/bar': 'foo'
         });
         const match = router('/foo/bar/baz');
-        expect(match.$route).toBe(router.foo);
-        expect(match.$remaining).toEqual('/baz');
+        expect(match.route).toBe(router.foo);
+        expect(match.remaining).toEqual('/baz');
     });
 
     it('matches sequentially', function() {
@@ -69,7 +71,7 @@ describe('myro', function() {
             '/foo': 'foo',
             '/foo/bar': 'foobar'
         });
-        expect(router('/foo/bar').$name).toEqual('foo');
+        expect(router('/foo/bar').name).toEqual('foo');
     });
 
 });

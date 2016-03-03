@@ -13,8 +13,8 @@ function assembleRoute(segment, routes = {}) {
 
 function assemble(routes, prefix = '') {
     return _.fromPairs(_.map(routes, (val, key) => {
-        const name = _.isObject(val) ? val.$name : val;
-        return [name, assembleRoute(prefix + key, _.isObject(val) ? val.$routes : null)];
+        const name = _.isObject(val) ? val.name : val;
+        return [name, assembleRoute(prefix + key, _.isObject(val) ? val.routes : null)];
     }));
 }
 
@@ -36,38 +36,41 @@ function match(routes, path) {
     const [matched, segment] = findMatch(routes, path)
     if (!matched) return null
     const spec = routes[segment];
-    const name = _.isObject(spec) ? spec.$name : spec;
-    const payload = _.isObject(spec) ? _.omit(spec, ['$name', '$routes']) : {};
-    const subRoutes = _.isObject(spec) ? spec.$routes : null;
+    const name = _.isObject(spec) ? spec.name : spec;
+    const props = _.isObject(spec) ? spec.props : {};
+    const subRoutes = _.isObject(spec) ? spec.routes : null;
     const paramKeys = (segment.match(placeHolderRegex) || []).map(trimLeadingColon);
     const remainingPath = _.last(matched);
     const params = _.zipObject(paramKeys, _.dropRight(_.tail(matched)));
     if (subRoutes && remainingPath) {
-        const subMatch = match(subRoutes, remainingPath);
-        if (subMatch) {
-            const [subName, subParams, subRemaining, subPayload] = subMatch
-            return [[name].concat(subName), _.assign(params, subParams), subRemaining, subPayload];
+        const childMatch = match(subRoutes, remainingPath);
+        if (childMatch) {
+            const [childName, childParams, childRemaining, childProps] = childMatch
+            return [[name].concat(childName), _.assign(params, childParams), childRemaining, childProps];
         }
     }
-    return [[name], params, remainingPath, payload];
+    return [[name], params, remainingPath, props];
 }
 
-export default function(routes) {
-    const router = assemble(routes);
-    function resolve(path) {
-        const matched = match(routes, path);
-        if (matched) {
-            const [keys, params, remaining, payload] = matched
-            const route = keys.reduce((obj, key) => obj[key], router);
-            const result = {
-                $params: params,
-                $remaining: remaining,
-                $route: route,
-                $name: keys.join('.')
-            };
-            return _.isObject(payload) ? _.assign(payload, result) : result;
+function resolve(routes, resolveRoute, path) {
+    const matched = match(routes, path);
+    if (matched) {
+        const [keys, params, remaining, props] = matched
+        return {
+            params,
+            remaining,
+            props,
+            route: resolveRoute(keys),
+            name: keys.join('.')
         }
-        return null;
     }
-    return _.assign(resolve, router);
-};
+    return null;
+}
+
+function myro(routes) {
+    const routeFns = assemble(routes);
+    const resolveRoute = path => path.reduce((obj, key) => obj[key], routeFns)
+    return _.assign(_.partial(resolve, routes, resolveRoute), routeFns);
+}
+
+export default myro
