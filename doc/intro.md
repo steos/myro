@@ -157,3 +157,33 @@ bazMatch.parent.params // {x: 'foo-val'}
 ```
 
 This works recursively, i.e. the parent itself also has a parent property.
+
+## Route Match
+
+The route match object provides the following properties:
+
+- **name**
+
+  The name of the route. For nested routes this will be formed by
+  concatenating the names of all parents with the matched route
+  separated by a dot. For example: `foo.bar.baz`
+
+- **params**
+
+  An object mapping parameter names to values.
+
+- **props**
+
+  The props object corresponding to the matched route.
+
+- **route**
+
+  The URL generation function for the matched route.
+
+- **parent**
+
+  An object containing the params and props of the parent route.
+
+- **remaining**
+
+  The remaining path after the match.
