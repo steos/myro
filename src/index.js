@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+import _ from 'lodash'
 
 var placeHolderRegex = /:([a-zA-Z_][a-zA-Z0-9_]*)/g;
 
@@ -47,7 +47,7 @@ function match(routes, path) {
     return null;
 }
 
-module.exports = function(routes) {
+export default function(routes) {
     var router = assemble(routes);
     function resolve(path) {
         var matched = match(routes, path);

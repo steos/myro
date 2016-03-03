@@ -1,4 +1,4 @@
-var myro = require('../src/index');
+import myro from '../src'
 
 describe('myro', function() {
 

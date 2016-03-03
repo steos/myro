@@ -1,3 +1,5 @@
+var path = require("path");
+
 // Karma configuration
 // Generated on Thu Jun 25 2015 13:58:27 GMT+0200 (CEST)
 
@@ -10,12 +12,11 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jasmine', 'browserify'],
+    frameworks: ['jasmine'],
 
 
     // list of files / patterns to load in the browser
     files: [
-      'src/**/*.js',
       'test/**/*.js'
     ],
 
@@ -28,8 +29,8 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-        'src/**/*.js': ['browserify'],
-        'test/**/*.js': ['browserify']
+        'src/**/*.js': ['webpack'],
+        'test/**/*.js': ['webpack']
     },
 
     browserify: {
@@ -41,6 +42,21 @@ module.exports = function(config) {
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: ['progress'],
 
+    webpack: {
+      devtool: "sourcemap",
+      module: {
+          loaders: [
+              {
+                  test: /\.js$/,
+                  exclude: /node_modules/,
+                  loader: 'babel',
+                  query: {
+                    presets: ['es2015']
+                  }
+              }
+          ]
+      }
+    },
 
     // web server port
     port: 9876,
