@@ -1,43 +1,43 @@
-#Myro
+# Myro
 
 __Myro__ is a bidirectional universal micro-router.
 
-###Getting Started
+### Getting Started
 
-####Installation
+#### Installation
 
 ```
 npm install myro --save
 ```
 
-####Example
+#### Example
 
-```
+```js
 
 import myro from 'myro'
 
 const route = myro({
     '/': {
-        $name: 'index'
+        name: 'index'
     },
 
     '/users': {
-        $name: 'users',
-        $routes: {
+        name: 'users',
+        routes: {
             '/:name': {
-                $name: 'user'
+                name: 'user'
             }
         }
     },
 
     '/about': {
-        $name: 'about'
+        name: 'about'
     }
 })
 
 // match routes...
-route('/users/foo')) // {$name: "users.user", $params: {name: "foo"}, $route: fn}
-route('/about')) //  {$name: "home.about", $params: {}, ... }
+route('/users/foo')) // {name: "users.user", params: {name: "foo"}, route: fn}
+route('/about')) //  {name: "home.about", params: {}, ... }
 
 
 // retrieve the path
@@ -47,11 +47,11 @@ route.about() // /about
 
 ```
 
-###Myro Examples
+### Myro Examples
 
 Coming soon.
 
-###Myro - React Examples
+### Myro - React Examples
 
 Coming soon.
 
