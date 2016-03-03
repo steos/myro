@@ -121,3 +121,39 @@ route.hello.named({who: "world"} // "/hello/world"
 ```
 
 Route names have to be unique only among their siblings.
+
+#### Param Merging
+
+In a nested route match params from parent and child will be merged.
+If they have the same name the child param will overwrite the parent.
+
+```js
+const route = myro({
+  '/foo/:x': {
+    name: 'foo',
+    routes: {
+      '/bar/:y': 'bar',
+      '/baz/:x': 'baz'
+    }
+  }
+})
+const barMatch = route('/foo/foo-val/bar/bar-val')
+barMatch.params // {x: 'foo-val', y: 'bar-val'}
+
+const bazMatch = route('/foo/foo-val/baz/baz-val')
+bazMatch.params // {x: 'baz-val'}
+```
+
+#### Route Match Parents
+
+The route match object also provides a parent property that contains
+the props and params of the parent route.
+Given the previous example you could still access the parent param
+even it was overwritten by the child through the parent property:
+
+```js
+bazMatch.params // {x: 'baz-val'}
+bazMatch.parent.params // {x: 'foo-val'}
+```
+
+This works recursively, i.e. the parent itself also has a parent property.
