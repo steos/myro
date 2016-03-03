@@ -1,16 +1,16 @@
-# Myro
+# myro
 
-__Myro__ is a bidirectional universal micro-router.
+__myro__ is a bidirectional universal micro-router.
 
-### Getting Started
+## Getting Started
 
-#### Installation
+### Installation
 
 ```
 npm install myro --save
 ```
 
-#### Example
+### Example
 
 ```js
 
@@ -47,13 +47,11 @@ route.about() // /about
 
 ```
 
-### Myro Examples
+## Documentation
 
-Coming soon.
-
-### Myro - React Examples
-
-Coming soon.
+- [Introduction](doc/intro.md)
+- Myro Examples (Coming Soon)
+- Myro React Examples (Coming Soon)
 
 # License
 
