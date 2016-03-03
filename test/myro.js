@@ -106,4 +106,42 @@ describe('myro', function() {
       expect(match.parent.parent.parent.props.foo).toEqual('prop-a')
     })
 
+    it('merges params from parent and child', function() {
+      const route = myro({
+        '/foo/:x': {
+          name: 'foo',
+          routes: {
+            '/bar/:y': 'bar'
+          }
+        }
+      })
+      expect(route('/foo/x-val/bar/y-val').params).toEqual({x: 'x-val', y: 'y-val'})
+    })
+
+    it('overwrites parent params with child params', function() {
+      const route = myro({
+        '/foo/:x': {
+          name: 'foo',
+          routes: {
+            '/bar/:x': 'bar'
+          }
+        }
+      })
+      const match = route('/foo/foo-val/bar/bar-val')
+      expect(match.params.x).toEqual('bar-val')
+      expect(match.parent.params.x).toEqual('foo-val')
+    })
+
+    it('matches root with empty string', function() {
+      const route = myro({
+        '': {
+          name: 'foo',
+          routes: {
+            '/bar': 'bar'
+          }
+        }
+      })
+      expect(route('/').name).toEqual('foo')
+      expect(route('/bar').name).toEqual('foo.bar')
+    })
 });
