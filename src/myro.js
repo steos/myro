@@ -3,12 +3,11 @@
 import trimStart from 'lodash/trimStart'
 import trimEnd from 'lodash/trimEnd'
 import template from 'lodash/template'
-import isObject from 'lodash/isObject'
 import assign from 'lodash/assign'
 
 const placeHolderRegex = /:([a-zA-Z_][a-zA-Z0-9_]*)/g;
 
-const trimLeadingColon = s => trimStart(s, ':')
+const isStr = x => Object.prototype.toString.call(x) === '[object String]'
 
 function zipObject(keys, vals) {
   const obj = {}
@@ -37,8 +36,8 @@ function assembleRoute(segment, routes = {}) {
 
 function assemble(routes, prefix = '') {
     return fromPairs(map(routes, (val, key) => {
-        const name = isObject(val) ? val.name : val;
-        return [name, assembleRoute(prefix + key, isObject(val) ? val.routes : null)];
+        const name = isStr(val) ? val : val.name
+        return [name, assembleRoute(prefix + key, isStr(val) ? null : val.routes)]
     }));
 }
 
@@ -56,18 +55,19 @@ function findMatch(routes, path) {
   return []
 }
 
+function specObj(spec) {
+  return isStr(spec) ? {name: spec} : spec
+}
+
 function match(routes, path, parent = null) {
     const [matched, segment] = findMatch(routes, path)
     if (!matched) return null
-    const spec = routes[segment];
-    const name = isObject(spec) ? spec.name : spec;
-    const props = isObject(spec) ? spec.props : {};
-    const childRoutes = isObject(spec) ? spec.routes : null;
-    const paramKeys = (segment.match(placeHolderRegex) || []).map(trimLeadingColon);
+    const {name, props = {}, routes: childRoutes = null} = specObj(routes[segment])
+    const paramKeys = (segment.match(placeHolderRegex) || []).map(s => trimStart(s, ':'))
     const remainingPath = matched[matched.length-1]
     const params = zipObject(paramKeys, matched.slice(1, -1))
     if (childRoutes && remainingPath) {
-        const childMatch = match(childRoutes, remainingPath, {name, props, params});
+        const childMatch = match(childRoutes, remainingPath, {name, props, params})
         if (childMatch) {
             const [childName, childParams, childRemaining, childProps, childParent] = childMatch
             return [
@@ -82,7 +82,7 @@ function match(routes, path, parent = null) {
     return [[name], params, remainingPath, props, [parent]];
 }
 
-function resolve(routes, resolveRoute, path) {
+function resolve(routes, routeFns, path) {
     const matched = match(routes, trimEnd(path, '/'))
     if (matched) {
         const [keys, params, remaining, props, parents] = matched
@@ -91,7 +91,7 @@ function resolve(routes, resolveRoute, path) {
             remaining,
             props,
             parent: parents.reduceRight((parent, child) => assign({parent}, child), null),
-            route: resolveRoute(keys),
+            route: keys.reduce((obj, key) => obj[key], routeFns),
             name: keys.join('.')
         }
     }
@@ -100,8 +100,7 @@ function resolve(routes, resolveRoute, path) {
 
 function myro(routes) {
     const routeFns = assemble(routes)
-    const resolveRoute = path => path.reduce((obj, key) => obj[key], routeFns)
-    return assign(path => resolve(routes, resolveRoute, path), routeFns)
+    return assign(path => resolve(routes, routeFns, path), routeFns)
 }
 
 export default myro
