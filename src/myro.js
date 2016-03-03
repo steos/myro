@@ -1,20 +1,31 @@
 'use strict';
 
-import _ from 'lodash'
+import trimStart from 'lodash/trimStart'
+import trimEnd from 'lodash/trimEnd'
+import template from 'lodash/template'
+import fromPairs from 'lodash/fromPairs'
+import isObject from 'lodash/isObject'
+import map from 'lodash/map'
+import assign from 'lodash/assign'
+import last from 'lodash/last'
+import tail from 'lodash/tail'
+import dropRight from 'lodash/dropRight'
+import zipObject from 'lodash/zipObject'
+import partial from 'lodash/partial'
 
 const placeHolderRegex = /:([a-zA-Z_][a-zA-Z0-9_]*)/g;
 
-const trimLeadingColon = _.ary(_.partialRight(_.trimStart, ':'), 1);
+const trimLeadingColon = s => trimStart(s, ':')
 
 function assembleRoute(segment, routes = {}) {
-    const renderPath = _.template(segment, {interpolate: placeHolderRegex});
-    return _.assign(renderPath, assemble(routes, segment));
+    const renderPath = template(segment, {interpolate: placeHolderRegex});
+    return assign(renderPath, assemble(routes, segment));
 }
 
 function assemble(routes, prefix = '') {
-    return _.fromPairs(_.map(routes, (val, key) => {
-        const name = _.isObject(val) ? val.name : val;
-        return [name, assembleRoute(prefix + key, _.isObject(val) ? val.routes : null)];
+    return fromPairs(map(routes, (val, key) => {
+        const name = isObject(val) ? val.name : val;
+        return [name, assembleRoute(prefix + key, isObject(val) ? val.routes : null)];
     }));
 }
 
@@ -36,19 +47,19 @@ function match(routes, path, parent = null) {
     const [matched, segment] = findMatch(routes, path)
     if (!matched) return null
     const spec = routes[segment];
-    const name = _.isObject(spec) ? spec.name : spec;
-    const props = _.isObject(spec) ? spec.props : {};
-    const childRoutes = _.isObject(spec) ? spec.routes : null;
+    const name = isObject(spec) ? spec.name : spec;
+    const props = isObject(spec) ? spec.props : {};
+    const childRoutes = isObject(spec) ? spec.routes : null;
     const paramKeys = (segment.match(placeHolderRegex) || []).map(trimLeadingColon);
-    const remainingPath = _.last(matched);
-    const params = _.zipObject(paramKeys, _.dropRight(_.tail(matched)));
+    const remainingPath = last(matched);
+    const params = zipObject(paramKeys, dropRight(tail(matched)));
     if (childRoutes && remainingPath) {
         const childMatch = match(childRoutes, remainingPath, {name, props, params});
         if (childMatch) {
             const [childName, childParams, childRemaining, childProps, childParent] = childMatch
             return [
               [name].concat(childName),
-              _.assign({}, params, childParams),
+              assign({}, params, childParams),
               childRemaining,
               childProps,
               childParent.concat(parent)
@@ -59,10 +70,10 @@ function match(routes, path, parent = null) {
 }
 
 function resolve(routes, resolveRoute, path) {
-    const matched = match(routes, _.trimEnd(path, '/'));
+    const matched = match(routes, trimEnd(path, '/'));
     if (matched) {
         const [keys, params, remaining, props, parents] = matched
-        const parent = parents.reduceRight((parent, child) => _.assign({parent}, child), null)
+        const parent = parents.reduceRight((parent, child) => assign({parent}, child), null)
         return {
             params,
             remaining,
@@ -78,7 +89,7 @@ function resolve(routes, resolveRoute, path) {
 function myro(routes) {
     const routeFns = assemble(routes);
     const resolveRoute = path => path.reduce((obj, key) => obj[key], routeFns)
-    return _.assign(_.partial(resolve, routes, resolveRoute), routeFns);
+    return assign(partial(resolve, routes, resolveRoute), routeFns);
 }
 
 export default myro
