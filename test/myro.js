@@ -116,6 +116,8 @@ describe('myro', function() {
         }
       })
       expect(route('/foo/x-val/bar/y-val').params).toEqual({x: 'x-val', y: 'y-val'})
+      expect(route.foo({x: 'the-x'})).toEqual('/foo/the-x')
+      expect(route.foo.bar({x: 'the-x', y: 'the-y'})).toEqual('/foo/the-x/bar/the-y')
     })
 
     it('overwrites parent params with child params', function() {
