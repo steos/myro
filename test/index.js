@@ -74,4 +74,36 @@ describe('myro', function() {
         expect(router('/foo/bar').name).toEqual('foo');
     });
 
+    it('provides a parent chain', function() {
+      const route = myro({
+        '/a': {
+          name: 'a',
+          props: {foo: 'prop-a'},
+          routes: {
+            '/b': {
+              name: 'b',
+              props: {foo: 'prop-b'},
+              routes: {
+                '/c': {
+                  name: 'c',
+                  props: {foo: 'prop-c'},
+                  routes: {
+                    '/d': {
+                      name: 'd',
+                      props: {foo: 'prop-d'}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+      const match = route('/a/b/c/d')
+      expect(match.props.foo).toEqual('prop-d')
+      expect(match.parent.props.foo).toEqual('prop-c')
+      expect(match.parent.parent.props.foo).toEqual('prop-b')
+      expect(match.parent.parent.parent.props.foo).toEqual('prop-a')
+    })
+
 });

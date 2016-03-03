@@ -32,34 +32,49 @@ function findMatch(routes, path) {
   return []
 }
 
-function match(routes, path) {
+function attachParent(obj, parent) {
+  // TODO this is horrible
+  let root = obj
+  while (root.parent) root = root.parent
+  root.parent = parent
+}
+
+function match(routes, path, parent = null) {
     const [matched, segment] = findMatch(routes, path)
     if (!matched) return null
     const spec = routes[segment];
     const name = _.isObject(spec) ? spec.name : spec;
     const props = _.isObject(spec) ? spec.props : {};
-    const subRoutes = _.isObject(spec) ? spec.routes : null;
+    const childRoutes = _.isObject(spec) ? spec.routes : null;
     const paramKeys = (segment.match(placeHolderRegex) || []).map(trimLeadingColon);
     const remainingPath = _.last(matched);
     const params = _.zipObject(paramKeys, _.dropRight(_.tail(matched)));
-    if (subRoutes && remainingPath) {
-        const childMatch = match(subRoutes, remainingPath);
+    if (childRoutes && remainingPath) {
+        const childMatch = match(childRoutes, remainingPath, {name, props});
         if (childMatch) {
-            const [childName, childParams, childRemaining, childProps] = childMatch
-            return [[name].concat(childName), _.assign(params, childParams), childRemaining, childProps];
+            const [childName, childParams, childRemaining, childProps, childParent] = childMatch
+            attachParent(childParent, parent)
+            return [
+              [name].concat(childName),
+              _.assign(params, childParams),
+              childRemaining,
+              childProps,
+              childParent
+            ];
         }
     }
-    return [[name], params, remainingPath, props];
+    return [[name], params, remainingPath, props, parent];
 }
 
 function resolve(routes, resolveRoute, path) {
     const matched = match(routes, path);
     if (matched) {
-        const [keys, params, remaining, props] = matched
+        const [keys, params, remaining, props, parent] = matched
         return {
             params,
             remaining,
             props,
+            parent,
             route: resolveRoute(keys),
             name: keys.join('.')
         }
