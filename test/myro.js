@@ -104,6 +104,7 @@ describe('myro', function() {
       expect(match.parent.props.foo).toEqual('prop-c')
       expect(match.parent.parent.props.foo).toEqual('prop-b')
       expect(match.parent.parent.parent.props.foo).toEqual('prop-a')
+      expect(match.parent.parent.parent.parent).toEqual(null)
     })
 
     it('merges params from parent and child', function() {

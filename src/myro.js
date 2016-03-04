@@ -90,7 +90,7 @@ function resolve(routes, routeFns, path) {
             params,
             remaining,
             props,
-            parent: parents.reduceRight((parent, child) => assign({parent}, child), null),
+            parent: parents.reduceRight((parent, child) => assign({parent}, child)),
             route: keys.reduce((obj, key) => obj[key], routeFns),
             name: keys.join('.')
         }
