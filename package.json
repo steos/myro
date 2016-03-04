@@ -6,7 +6,7 @@
   "main": "lib/myro.js",
   "license": "BSD-3-Clause",
   "scripts": {
-    "test": "karma start",
+    "test": "./node_modules/.bin/karma start --single-run",
     "prepublish": "webpack -p"
   },
   "repository": {
