@@ -59,7 +59,7 @@ route.about() // "/about"
 - Myro Examples (Coming Soon)
 - Myro React Examples (Coming Soon)
 
-# License
+## License
 
 Copyright © 2016 Stefan Oestreicher and contributors.
 
