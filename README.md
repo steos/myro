@@ -1,5 +1,7 @@
 # myro
 
+[![Build Status](https://travis-ci.org/steos/myro.svg?branch=master)](https://travis-ci.org/steos/myro)
+
 __myro__ is a bidirectional universal micro-router.
 
 ## Getting Started
