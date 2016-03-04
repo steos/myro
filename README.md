@@ -2,7 +2,11 @@
 
 [![Build Status](https://travis-ci.org/steos/myro.svg?branch=master)](https://travis-ci.org/steos/myro)
 
-__myro__ is a bidirectional universal micro-router.
+__myro__ is a universal bidirectional micro-router.
+
+It works with pure data and is only concerned with route matching.
+No assumptions are made on how to handle or dispatch a route match.
+Implementation of that logic is left to the user.
 
 ## Getting Started
 
@@ -39,12 +43,12 @@ const route = myro({
 
 // match routes...
 route('/users/foo')) // {name: "users.user", params: {name: "foo"}, route: fn}
-route('/about')) //  {name: "home.about", params: {}, ... }
+route('/about')) //  {name: "about", params: {}, ... }
 
 
 // retrieve the path
-route.users.user({name: 'foo'}) // /users/foo
-route.about() // /about
+route.users.user({name: 'foo'}) // "/users/foo"
+route.about() // "/about"
 
 
 ```

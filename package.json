@@ -1,7 +1,7 @@
 {
   "name": "myro",
   "version": "0.6.1",
-  "description": "a bidirectional universal microrouter",
+  "description": "universal bidirectional microrouter",
   "author": "Stefan Oestreicher <oestef@gmail.com>",
   "main": "lib/myro.js",
   "license": "BSD-3-Clause",
