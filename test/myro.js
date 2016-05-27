@@ -147,4 +147,51 @@ describe('myro', function() {
       expect(route('/').name).toEqual('foo')
       expect(route('/bar').name).toEqual('foo.bar')
     })
+
+    it('can match recursively', function() {
+      const route = myro({
+        '/folder': {
+          name: 'folder',
+          routes: {
+            '/:name': {
+              name: 'item',
+              recur: true
+            }
+          }
+        }
+      })
+
+      expect(route('/folder').name).toEqual('folder')
+      expect(route('/folder/foo').params.name).toEqual('foo')
+      expect(route('/folder/foo/bar').params.name).toEqual('bar')
+
+      const listParents = match => {
+        if (match.parent === null) return []
+        return listParents(match.parent).concat(match.parent)
+      }
+
+      const match = route('/folder/foo/bar/baz/lorem/ipsum')
+
+      const names = listParents(match).slice(1).map(m => m.params.name)
+      expect(names).toEqual(['foo', 'bar', 'baz', 'lorem'])
+
+    })
+
+    it('can generate URLs recursively', function() {
+      const route = myro({
+        '/folder': {
+          name: 'folder',
+          routes: {
+            '/d/:name/:id': {
+              name: 'item',
+              recur: true
+            }
+          }
+        }
+      })
+
+      expect(route.folder.item([{name: 'lorem', id: 1}, {name: 'ipsum', id: 2}])).toEqual('/folder/d/lorem/1/d/ipsum/2')
+
+    })
+
 });

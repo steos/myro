@@ -9,6 +9,8 @@ const placeHolderRegex = /:([a-zA-Z_][a-zA-Z0-9_]*)/g;
 
 const isStr = x => Object.prototype.toString.call(x) === '[object String]'
 
+const isArray = x => Object.prototype.toString.call(x) === '[object Array]'
+
 function zipObject(keys, vals) {
   const obj = {}
   keys.forEach((key, index) => obj[key] = vals[index])
@@ -23,21 +25,36 @@ function map(obj, f) {
   return result
 }
 
+function mapObj(obj, f) {
+  return zipObject(Object.keys(obj), map(obj, f))
+}
+
 function fromPairs(pairs) {
   const obj = {}
   pairs.forEach(([key, val]) => obj[key] = val)
   return obj
 }
 
-function assembleRoute(segment, routes = {}) {
-    const renderPath = template(segment, {interpolate: placeHolderRegex});
-    return assign(renderPath, assemble(routes, segment));
+function specObj(spec) {
+  return isStr(spec) ? {name: spec} : spec
+}
+
+function assembleRoute(prefix, segment, routes = {}, recur = false) {
+    const renderPath = template(prefix+segment, {interpolate: placeHolderRegex});
+    const render = !recur ? renderPath : params => {
+      if (isArray(params)) {
+        if (!recur) throw new Error('multiple param objects only allowed for recursive route!')
+        return prefix + params.map(template(segment, {interpolate: placeHolderRegex})).join('')
+      }
+      return renderPath(params)
+    }
+    return assign(render, assemble(routes, prefix+segment));
 }
 
 function assemble(routes, prefix = '') {
     return fromPairs(map(routes, (val, key) => {
-        const name = isStr(val) ? val : val.name
-        return [name, assembleRoute(prefix + key, isStr(val) ? null : val.routes)]
+        const {name, routes = {}, recur = false} = specObj(val)
+        return [name, assembleRoute(prefix, key, routes, recur)]
     }));
 }
 
@@ -55,19 +72,28 @@ function findMatch(routes, path) {
   return []
 }
 
-function specObj(spec) {
-  return isStr(spec) ? {name: spec} : spec
-}
-
 function match(routes, path, parent = null) {
     const [matched, segment] = findMatch(routes, path)
     if (!matched) return null
-    const {name, props = {}, routes: childRoutes = null} = specObj(routes[segment])
+    const spec = specObj(routes[segment])
+    const {
+      name,
+      props = {},
+      routes: childRoutes = null,
+      recur = false
+    } = spec
     const paramKeys = (segment.match(placeHolderRegex) || []).map(s => trimStart(s, ':'))
     const remainingPath = matched[matched.length-1]
     const params = zipObject(paramKeys, matched.slice(1, -1))
-    if (childRoutes && remainingPath) {
-        const childMatch = match(childRoutes, remainingPath, {name, props, params})
+    if (remainingPath && (childRoutes || recur)) {
+        let childMatch = null
+        if (childRoutes) {
+          childMatch = match(childRoutes, remainingPath, {name, props, params})
+        } else if (recur) {
+          childMatch = match({[segment]: spec}, remainingPath, {name, props, params})
+        } else {
+          throw new Error()
+        }
         if (childMatch) {
             const [childName, childParams, childRemaining, childProps, childParent] = childMatch
             return [
@@ -86,12 +112,13 @@ function resolve(routes, routeFns, path) {
     const matched = match(routes, trimEnd(path, '/'))
     if (matched) {
         const [keys, params, remaining, props, parents] = matched
+        // console.log("matched", keys, Object.keys(routeFns))
         return {
             params,
             remaining,
             props,
             parent: parents.reduceRight((parent, child) => assign({parent}, child)),
-            route: keys.reduce((obj, key) => obj[key], routeFns),
+            route: keys.reduce((obj, key) => obj[key] || obj, routeFns),
             name: keys.join('.')
         }
     }
