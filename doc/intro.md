@@ -158,6 +158,62 @@ bazMatch.parent.params // {x: 'foo-val'}
 
 This works recursively, i.e. the parent itself also has a parent property.
 
+## Matching Algorithm
+
+The matching algorithm is very naive, it simply tries to match
+each route sequentially and if successful recurses into child routes.
+
+Therefore more specific routes have to come first, consider:
+
+```js
+const route = myro({
+    '/foo': 'foo',
+    '/foo/bar': 'foobar'
+});
+route('/foo/bar').name // 'foo'
+```
+
+In this example `/foo` will match first. To make this work put the more specific
+route first or use child routes:
+
+```js
+const route = myro({
+    '/foo': {
+      name: 'foo',
+      routes: {
+        '/bar': 'bar'
+      }
+    }
+});
+route('/foo/bar').name // 'foo.bar'
+```
+
+### Partial Match
+
+Route matches may be partial. In this case the match result will contain
+a `remaining` property which contains the remaining path.
+
+For example:
+```js
+const route = myro({
+    '/foo/bar': 'foo'
+})
+const match = route('/foo/bar/baz') // {remaining: '/baz', name: 'foo' }
+```
+
+If you require a full match simply check for the remaining property to be null.
+
+For example:
+```js
+// in your dispatch logic
+match = route(path)
+if (match == null || match.remaining != null) {
+  // handle no match or only partial match
+} else {
+  // handle full match
+}
+```
+
 ## Route Match
 
 The route match object provides the following properties:

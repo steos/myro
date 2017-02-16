@@ -23,10 +23,6 @@ npm install myro --save
 import myro from 'myro'
 
 const route = myro({
-    '/': {
-        name: 'index'
-    },
-
     '/users': {
         name: 'users',
         routes: {
@@ -38,7 +34,11 @@ const route = myro({
 
     '/about': {
         name: 'about'
-    }
+    },
+
+    '/': {
+        name: 'index'
+    },
 })
 
 // match routes...
